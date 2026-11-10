@@ -1,0 +1,27 @@
+---
+/**
+ * Ícones Lucide (traço 2px, pontas arredondadas), embutidos no HTML no build.
+ * Não carrega JavaScript nem requisição extra.
+ */
+import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { dirname, join } from 'node:path';
+
+interface Props {
+  name: string;
+  size?: number;
+  class?: string;
+}
+const { name, size = 24, class: className = '' } = Astro.props;
+
+const require = createRequire(import.meta.url);
+const dir = join(dirname(require.resolve('lucide-static/package.json')), 'icons');
+const raw = readFileSync(join(dir, `${name}.svg`), 'utf8');
+const svg = raw
+  .replace(/<!--[\s\S]*?-->/g, '')
+  .replace(/class="[^"]*"/, `class="icon ${className}" aria-hidden="true" focusable="false"`)
+  .replace(/width="24"/, `width="${size}"`)
+  .replace(/height="24"/, `height="${size}"`)
+  .trim();
+---
+<Fragment set:html={svg} />

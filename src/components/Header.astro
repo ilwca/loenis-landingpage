@@ -1,0 +1,41 @@
+---
+import Icon from './Icon.astro';
+import { waLink } from '../lib/whatsapp';
+---
+<header class="header">
+  <div class="container bar">
+    <a href="/" class="logo" aria-label="Loenis, página inicial">
+      <img src="/logos/loenis-logo.svg" alt="Loenis" width="132" height="36" />
+    </a>
+    <nav aria-label="Principal">
+      <ul role="list">
+        <li><a href="/#servicos">Serviços</a></li>
+        <li><a href="/#trabalhos">Trabalhos</a></li>
+        <li><a href="/#duvidas">Dúvidas</a></li>
+      </ul>
+    </nav>
+    <a class="btn btn-ink cta" href={waLink()} data-wa="header" target="_blank" rel="noopener">
+      <Icon name="message-circle" />
+      <span>WhatsApp</span>
+    </a>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--surface);
+    border-bottom: 1px solid rgb(138 131 114 / 0.35);
+  }
+  .bar { display: flex; align-items: center; gap: var(--space-6); min-height: 72px; }
+  .logo img { height: 36px; width: auto; }
+  nav { margin-left: auto; display: none; }
+  nav ul { display: flex; gap: var(--space-6); }
+  nav a { color: var(--ink); text-decoration: none; font-weight: 600; }
+  nav a:hover { color: var(--brand-strong); }
+  .cta { margin-left: auto; min-height: 44px; padding-inline: var(--space-4); }
+  @media (min-width: 720px) {
+    nav { display: block; }
+    .cta { margin-left: 0; }
+  }
+</style>

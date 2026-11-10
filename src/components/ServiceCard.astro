@@ -1,0 +1,123 @@
+---
+/**
+ * Card de serviço com escolha de contexto.
+ * O cliente toca no que precisa e o botão abre o WhatsApp com a mensagem certa.
+ * Sem JavaScript, o botão continua funcionando com a primeira opção.
+ */
+import Icon from './Icon.astro';
+import type { Service } from '../config/services';
+import { waLink } from '../lib/whatsapp';
+
+interface Props { service: Service; headingLevel?: 'h2' | 'h3' }
+const { service: s, headingLevel = 'h3' } = Astro.props;
+const H = headingLevel;
+const first = s.contexts[0];
+---
+<article class={`card tone-${s.tone}`} data-card>
+  <div class="head">
+    <span class="icon-wrap"><Icon name={s.icon} size={28} /></span>
+    <span class="t-label kicker">{s.label}</span>
+  </div>
+  <H class="t-heading"><a href={`/${s.slug}`} class="title-link">{s.name}</a></H>
+  <p class="muted">{s.summary}</p>
+
+  <fieldset class="contexts">
+    <legend class="t-caption">O que você precisa?</legend>
+    <div class="chips">
+      {s.contexts.map((c, i) => (
+        <label class="chip">
+          <input
+            type="radio"
+            name={`ctx-${s.slug}`}
+            value={c.id}
+            checked={i === 0}
+            data-href={waLink(c.message)}
+            data-message={c.message}
+          />
+          <span>{c.label}</span>
+        </label>
+      ))}
+    </div>
+  </fieldset>
+
+  <p class="preview t-caption" aria-live="polite">
+    <span class="sr-only">Mensagem que será enviada: </span>“<span data-preview>{first.message}</span>”
+  </p>
+
+  <div class="actions">
+    <a
+      class="btn btn-ink btn-block"
+      href={waLink(first.message)}
+      target="_blank"
+      rel="noopener"
+      data-wa="card"
+      data-service={s.slug}
+      data-context={first.id}
+      data-cta
+    >
+      <Icon name="message-circle" />
+      Chamar no WhatsApp
+    </a>
+    <a class="link-arrow" href={`/${s.slug}`}>Ver detalhes <Icon name="arrow-right" size={18} /></a>
+  </div>
+</article>
+
+<style>
+  .card {
+    display: flex; flex-direction: column; gap: var(--space-4);
+    padding: var(--space-6);
+    background: var(--surface-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    transition: border-color 0.15s;
+  }
+  .card:hover, .card:focus-within { border-color: var(--ink); }
+  .head { display: flex; align-items: center; justify-content: space-between; }
+  .icon-wrap {
+    display: grid; place-items: center; width: 48px; height: 48px;
+    border-radius: var(--radius-md);
+  }
+  .tone-brand .icon-wrap { background: var(--brand-tint); color: var(--ink); }
+  .tone-signal .icon-wrap { background: var(--surface); color: var(--signal); }
+  .tone-brand .kicker { color: var(--brand-strong); }
+  .tone-signal .kicker { color: var(--signal); }
+  .title-link { color: var(--ink); text-decoration: none; }
+  .title-link:hover { text-decoration: underline; }
+
+  .contexts { border: 0; padding: 0; margin: var(--space-2) 0 0; min-width: 0; }
+  legend { padding: 0; margin-bottom: var(--space-2); }
+  .chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .chip { position: relative; cursor: pointer; }
+  .chip input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+  .chip span {
+    display: inline-flex; align-items: center; min-height: 40px;
+    padding: 8px 14px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    font: 500 14px/20px var(--font-sans);
+    background: var(--surface-raised);
+    transition: background-color 0.15s, border-color 0.15s;
+  }
+  .chip:hover span { border-color: var(--ink); }
+  .chip input:checked + span { border: 2px solid var(--ink); padding: 7px 13px; font-weight: 600; }
+  .tone-brand .chip input:checked + span { background: var(--brand-tint); }
+  .tone-signal .chip input:checked + span { background: var(--surface); }
+  .chip input:focus-visible + span { outline: 2px solid var(--signal); outline-offset: 2px; }
+
+  .preview { font-style: italic; min-height: 36px; }
+  .actions { margin-top: auto; display: grid; gap: var(--space-4); justify-items: center; }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-card]').forEach((card) => {
+    const cta = card.querySelector<HTMLAnchorElement>('[data-cta]');
+    const preview = card.querySelector<HTMLElement>('[data-preview]');
+    card.addEventListener('change', (e) => {
+      const input = e.target as HTMLInputElement;
+      if (!cta || input.type !== 'radio') return;
+      cta.href = input.dataset.href!;
+      cta.dataset.context = input.value;
+      if (preview) preview.textContent = input.dataset.message!;
+    });
+  });
+</script>

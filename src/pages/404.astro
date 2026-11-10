@@ -1,0 +1,15 @@
+---
+import Base from '../layouts/Base.astro';
+import { services } from '../config/services';
+---
+<Base title="Página não encontrada | Loenis" description="Esta página não existe. Veja os serviços da Loenis." noindex>
+  <section class="section">
+    <div class="container stack-6">
+      <h1 class="t-title">Esta página não existe</h1>
+      <p class="muted">Veja os serviços ou volte para o <a href="/">início</a>.</p>
+      <ul class="stack-2">
+        {services.map((s) => <li><a href={`/${s.slug}`}>{s.name}</a></li>)}
+      </ul>
+    </div>
+  </section>
+</Base>

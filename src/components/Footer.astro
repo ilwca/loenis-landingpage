@@ -1,0 +1,40 @@
+---
+import { site, cityLabel } from '../config/site';
+import { services } from '../config/services';
+import { waLink } from '../lib/whatsapp';
+const year = new Date().getFullYear();
+---
+<footer class="footer on-ink">
+  <div class="container grid">
+    <div class="stack-4">
+      <img src="/logos/loenis-logo-negativo.svg" alt="Loenis" width="132" height="36" loading="lazy" />
+      <p class="measure">Elétrica, energia solar, TI, Starlink, bombeamento solar e redes em {cityLabel} e região.</p>
+    </div>
+    <nav aria-label="Serviços">
+      <h2 class="t-label">Serviços</h2>
+      <ul role="list" class="stack-2">
+        {services.map((s) => <li><a href={`/${s.slug}`}>{s.name}</a></li>)}
+      </ul>
+    </nav>
+    <div class="stack-2">
+      <h2 class="t-label">Contato</h2>
+      <p><a href={waLink()} data-wa="rodape" target="_blank" rel="noopener">WhatsApp {site.whatsappDisplay}</a></p>
+      <p>{site.hours}</p>
+      <p>Atendo {site.areaServed.join(', ')}</p>
+    </div>
+  </div>
+  <div class="container legal">
+    <p>© {year} Loenis. Starlink é marca registrada da Space Exploration Technologies Corp.</p>
+  </div>
+</footer>
+
+<style>
+  .footer { background: var(--ink); color: var(--surface); padding-block: var(--space-12) var(--space-6); }
+  .grid { display: grid; gap: var(--space-12) var(--space-6); }
+  @media (min-width: 800px) { .grid { grid-template-columns: 1.4fr 1fr 1fr; } }
+  .footer img { height: 36px; width: auto; }
+  h2 { color: var(--brand); margin-bottom: var(--space-4); }
+  a { color: var(--surface); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .legal { margin-top: var(--space-12); padding-top: var(--space-6); border-top: 1px solid rgb(246 242 233 / 0.2); font-size: 13px; line-height: 18px; opacity: 0.85; }
+</style>

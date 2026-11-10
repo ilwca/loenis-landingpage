@@ -1,0 +1,34 @@
+---
+import Icon from './Icon.astro';
+import BrandMark from './BrandMark.astro';
+import { waLink } from '../lib/whatsapp';
+interface Props { title?: string; text?: string; message?: string; source?: string }
+const {
+  title = 'Me conte o que você precisa',
+  text = 'Mande uma mensagem com fotos ou a descrição do problema. Respondo com o próximo passo e o orçamento.',
+  message,
+  source = 'faixa-final',
+} = Astro.props;
+---
+<section class="band on-ink" aria-labelledby="cta-band-title">
+  <BrandMark class="art" />
+  <div class="container inner">
+    <div class="stack-4">
+      <h2 id="cta-band-title" class="t-title">{title}</h2>
+      <p class="measure">{text}</p>
+    </div>
+    <a class="btn btn-primary" href={waLink(message)} target="_blank" rel="noopener" data-wa={source}>
+      <Icon name="message-circle" />
+      Chamar no WhatsApp
+    </a>
+  </div>
+</section>
+
+<style>
+  .band { position: relative; overflow: hidden; background: var(--ink); color: var(--surface); padding-block: var(--space-12); }
+  @media (min-width: 900px) { .band { padding-block: calc(var(--space-12) * 2); } }
+  .art { position: absolute; right: -120px; bottom: -160px; width: 520px; color: var(--brand); opacity: 1; pointer-events: none; }
+  @media (max-width: 719px) { .art { width: 320px; right: -110px; bottom: -120px; opacity: 0.35; } }
+  .inner { position: relative; display: grid; gap: var(--space-6); justify-items: start; }
+  .inner > .stack-4 { max-width: 620px; }
+</style>

@@ -1,0 +1,109 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import WhatsAppBar from '../components/WhatsAppBar.astro';
+import { site } from '../config/site';
+import { services } from '../config/services';
+
+interface Props {
+  title: string;
+  description: string;
+  /** JSON-LD adicional da página (Service, FAQPage, BreadcrumbList…). */
+  schema?: Record<string, unknown>[];
+  /** Mensagem da barra fixa de WhatsApp no celular. */
+  waMessage?: string;
+  ogImage?: string;
+  noindex?: boolean;
+}
+const { title, description, schema = [], waMessage, ogImage = '/og.png', noindex = false } = Astro.props;
+
+const canonical = new URL(Astro.url.pathname.replace(/\/index$/, '/').replace(/\.html$/, ''), Astro.site ?? site.url).href;
+const ogImageUrl = new URL(ogImage, Astro.site ?? site.url).href;
+
+const business = {
+  '@context': 'https://schema.org',
+  '@type': ['LocalBusiness', 'Electrician'],
+  '@id': `${site.url}/#negocio`,
+  name: site.name,
+  url: site.url,
+  logo: `${site.url}/logos/loenis-logo.svg`,
+  image: ogImageUrl,
+  telephone: `+${site.whatsapp}`,
+  email: site.email,
+  description:
+    'Elétrica residencial e industrial, energia solar on-grid e off-grid, assistência técnica de TI, Starlink (técnico homologado), bombeamento de água solar e infraestrutura de redes.',
+  address: { '@type': 'PostalAddress', addressLocality: site.city, addressRegion: site.state, addressCountry: 'BR' },
+  ...(site.geo && { geo: { '@type': 'GeoCoordinates', latitude: site.geo.lat, longitude: site.geo.lng } }),
+  areaServed: site.areaServed.map((name) => ({ '@type': 'City', name })),
+  openingHoursSpecification: {
+    '@type': 'OpeningHoursSpecification',
+    dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+    opens: '08:00',
+    closes: '18:00',
+  },
+  hasOfferCatalog: {
+    '@type': 'OfferCatalog',
+    name: 'Serviços',
+    itemListElement: services.map((s) => ({
+      '@type': 'Offer',
+      itemOffered: { '@type': 'Service', name: s.name, url: `${site.url}/${s.slug}` },
+    })),
+  },
+  ...(site.social.length && { sameAs: site.social.map((s) => s.url) }),
+};
+---
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large'} />
+    <meta name="theme-color" content="#14213a" />
+    <meta name="geo.region" content={`BR-${site.state}`} />
+    <meta name="geo.placename" content={site.city} />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="preload" href="/fonts/Archivo-Variable.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/PublicSans-Variable.woff2" as="font" type="font/woff2" crossorigin />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json" set:html={JSON.stringify(business)} />
+    {schema.map((s) => <script type="application/ld+json" set:html={JSON.stringify({ '@context': 'https://schema.org', ...s })} />)}
+  </head>
+  <body>
+    <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+    <Header />
+    <main id="conteudo">
+      <slot />
+    </main>
+    <Footer />
+    <WhatsAppBar message={waMessage} />
+
+    <script>
+      // Medição de conversão: todo link de WhatsApp com data-wa envia um evento.
+      // Funciona com Google Tag Manager (dataLayer) e GA4 (gtag) se forem adicionados depois.
+      document.addEventListener('click', (e) => {
+        const a = (e.target as HTMLElement).closest<HTMLAnchorElement>('a[data-wa]');
+        if (!a) return;
+        const detail = { event: 'whatsapp_click', wa_source: a.dataset.wa, wa_service: a.dataset.service ?? '', wa_context: a.dataset.context ?? '' };
+        const w = window as any;
+        (w.dataLayer ||= []).push(detail);
+        if (typeof w.gtag === 'function') w.gtag('event', 'generate_lead', detail);
+      });
+    </script>
+  </body>
+</html>

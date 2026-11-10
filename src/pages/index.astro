@@ -1,0 +1,184 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import ServiceCard from '../components/ServiceCard.astro';
+import PhotoPlaceholder from '../components/PhotoPlaceholder.astro';
+import Faq from '../components/Faq.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { site, cityLabel } from '../config/site';
+import { services } from '../config/services';
+import { waLink } from '../lib/whatsapp';
+
+const title = `Eletricista, energia solar e Starlink em ${cityLabel} | Loenis`;
+const description = `Loenis: elétrica residencial e industrial, energia solar on-grid e off-grid, assistência de TI, Starlink (técnico homologado), bombeamento solar e redes em ${cityLabel}. Orçamento pelo WhatsApp.`;
+
+const steps = [
+  { icon: 'message-circle', title: 'Você me chama no WhatsApp', text: 'Escolha o serviço e mande fotos ou a descrição do que precisa.' },
+  { icon: 'file-text', title: 'Passo o orçamento', text: 'Serviços simples, pelo próprio WhatsApp. Obras maiores, depois de uma visita técnica.' },
+  { icon: 'wrench', title: 'Faço o serviço e explico', text: 'Entrego funcionando, mostro o que foi feito e fico à disposição depois.' },
+];
+
+const faq = [
+  { q: 'Quais cidades você atende?', a: `Atendo ${site.areaServed.join(', ')} e zona rural da região. Para outras cidades, me chame no WhatsApp com a localização.` },
+  { q: 'Como peço um orçamento?', a: 'Escolha o serviço nesta página e toque em “Chamar no WhatsApp”. A mensagem já vai com o assunto; é só completar com fotos ou detalhes.' },
+  { q: 'Você é técnico homologado Starlink?', a: 'Sim. Faço a instalação da antena, a passagem de cabo e a ampliação do Wi-Fi.' },
+  { q: 'Atende casas e empresas?', a: 'Sim. Atendo residências, comércios, indústrias e propriedades rurais.' },
+  { q: 'Qual o horário de atendimento?', a: `${site.hours}. Para urgências elétricas, me chame no WhatsApp a qualquer hora.` },
+];
+
+const schema = [
+  {
+    '@type': 'FAQPage',
+    mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+  },
+];
+---
+<Base title={title} description={description} schema={schema}>
+  <!-- Topo -->
+  <section class="hero">
+    <div class="container hero-grid">
+      <div class="stack-6">
+        <p class="t-label kicker">Técnico em {cityLabel}</p>
+        <h1 class="t-display">Elétrica, energia solar e internet em {site.city} e região</h1>
+        <p class="lead measure">
+          Sou o Loenis. Atendo casas, empresas e propriedades rurais em seis frentes, da tomada ao telhado e à antena.
+          Me chame no WhatsApp e respondo com o orçamento.
+        </p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href={waLink()} target="_blank" rel="noopener" data-wa="topo">
+            <Icon name="message-circle" />
+            Pedir orçamento no WhatsApp
+          </a>
+          <a class="btn btn-outline" href="#servicos">Ver serviços</a>
+        </div>
+        <ul role="list" class="trust">
+          <li><Icon name="shield-check" size={20} /> Técnico homologado Starlink</li>
+          <li><Icon name="file-text" size={20} /> Orçamento sem compromisso</li>
+          <li><Icon name="map-pin" size={20} /> Zona urbana e rural</li>
+        </ul>
+      </div>
+      <PhotoPlaceholder caption="O Loenis trabalhando com EPI" ratio="4/5" eager showCaption={false} />
+    </div>
+  </section>
+
+  <!-- Serviços -->
+  <section id="servicos" class="section" aria-labelledby="servicos-titulo">
+    <div class="container stack-6">
+      <div class="section-head stack-2">
+        <p class="t-label kicker">Serviços</p>
+        <h2 id="servicos-titulo" class="t-title">Escolha o serviço e me chame já com o assunto certo</h2>
+        <p class="muted measure">Toque no que você precisa em cada card. A mensagem do WhatsApp vai pronta.</p>
+      </div>
+      <div class="cards">
+        {services.map((s) => <ServiceCard service={s} />)}
+      </div>
+    </div>
+  </section>
+
+  <!-- Como funciona -->
+  <section class="section steps-section" aria-labelledby="como-titulo">
+    <div class="container stack-6">
+      <h2 id="como-titulo" class="t-title">Como funciona</h2>
+      <ol class="steps" role="list">
+        {steps.map((st, i) => (
+          <li class="step">
+            <span class="num" aria-hidden="true">{i + 1}</span>
+            <div class="stack-2">
+              <h3 class="t-heading">{st.title}</h3>
+              <p class="muted">{st.text}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- Trabalhos -->
+  <section id="trabalhos" class="section" aria-labelledby="trabalhos-titulo">
+    <div class="container stack-6">
+      <div class="stack-2">
+        <p class="t-label kicker">Trabalhos</p>
+        <h2 id="trabalhos-titulo" class="t-title">Serviços feitos</h2>
+        <p class="muted measure">Fotos reais das instalações. Em breve, mais trabalhos aqui.</p>
+      </div>
+      <div class="gallery">
+        {services.map((s) => (
+          <a href={`/${s.slug}`} class="gallery-item">
+            <PhotoPlaceholder caption={s.photos[0].caption} />
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Área de atendimento -->
+  <section class="section area" aria-labelledby="area-titulo">
+    <div class="container area-grid">
+      <div class="stack-4">
+        <h2 id="area-titulo" class="t-title">Onde atendo</h2>
+        <p class="muted measure">Base em {cityLabel}. Atendo a cidade, as cidades vizinhas e a zona rural. Para lugares mais distantes, combino o deslocamento.</p>
+      </div>
+      <ul role="list" class="cities">
+        {site.areaServed.map((c) => <li><Icon name="map-pin" size={20} /> {c}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  <!-- Dúvidas -->
+  <section id="duvidas" class="section" aria-labelledby="duvidas-titulo">
+    <div class="container stack-6">
+      <h2 id="duvidas-titulo" class="t-title">Dúvidas frequentes</h2>
+      <Faq items={faq} />
+    </div>
+  </section>
+
+  <CtaBand />
+</Base>
+
+<style>
+  .kicker { color: var(--brand-strong); }
+  .hero { padding-block: var(--space-12); }
+  .hero-grid { display: grid; gap: var(--space-12); align-items: center; }
+  @media (min-width: 900px) {
+    .hero { padding-block: var(--space-12) calc(var(--space-12) * 1.5); }
+    .hero-grid { grid-template-columns: 1.15fr 0.85fr; }
+  }
+  @media (max-width: 899px) { .hero-grid :global(.ph), .hero-grid :global(img) { aspect-ratio: 16/9; } }
+  .lead { font-size: 18px; line-height: 28px; color: var(--ink-muted); }
+  .hero-cta { display: flex; flex-wrap: wrap; gap: var(--space-4); }
+  @media (max-width: 479px) { .hero-cta .btn { width: 100%; } }
+  .trust { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); }
+  .trust li { display: inline-flex; align-items: center; gap: var(--space-2); font-weight: 600; font-size: 15px; }
+  .trust :global(svg) { color: var(--brand-strong); }
+
+  .section-head { max-width: 720px; }
+  .cards { display: grid; gap: var(--space-6); }
+  @media (min-width: 720px) { .cards { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1080px) { .cards { grid-template-columns: repeat(3, 1fr); } }
+
+  .steps-section { background: var(--surface-raised); border-block: 1px solid rgb(138 131 114 / 0.35); }
+  .steps { display: grid; gap: var(--space-6); padding: 0; list-style: none; }
+  @media (min-width: 800px) { .steps { grid-template-columns: repeat(3, 1fr); } }
+  .step { display: flex; gap: var(--space-4); align-items: flex-start; }
+  .num {
+    flex: none; display: grid; place-items: center; width: 40px; height: 40px;
+    border-radius: 50%; background: var(--ink); color: var(--surface);
+    font: 700 18px/1 var(--font-display);
+  }
+
+  .gallery { display: grid; gap: var(--space-6); grid-template-columns: 1fr; }
+  @media (min-width: 600px) { .gallery { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1000px) { .gallery { grid-template-columns: repeat(3, 1fr); } }
+  .gallery-item { color: inherit; text-decoration: none; }
+
+  .area { background: var(--brand-tint); }
+  .area-grid { display: grid; gap: var(--space-6); align-items: center; }
+  @media (min-width: 800px) { .area-grid { grid-template-columns: 1fr 1fr; } }
+  .cities { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .cities li {
+    display: inline-flex; align-items: center; gap: var(--space-2);
+    padding: 10px var(--space-4); border-radius: var(--radius-sm);
+    background: var(--surface-raised); border: 1px solid var(--line); font-weight: 600;
+  }
+  .area :global(.muted) { color: var(--ink); }
+</style>

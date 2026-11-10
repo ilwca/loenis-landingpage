@@ -1,0 +1,181 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import PhotoPlaceholder from '../components/PhotoPlaceholder.astro';
+import Faq from '../components/Faq.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { site, cityLabel } from '../config/site';
+import { services, type Service } from '../config/services';
+import { waLink, withCity } from '../lib/whatsapp';
+
+export function getStaticPaths() {
+  return services.map((service) => ({ params: { slug: service.slug }, props: { service } }));
+}
+
+const { service: s } = Astro.props as { service: Service };
+const url = `${site.url}/${s.slug}`;
+const title = `${s.seoTitle} em ${cityLabel} | Loenis`;
+const description = withCity(s.seoDescription);
+const others = services.filter((o) => o.slug !== s.slug);
+
+const schema = [
+  {
+    '@type': 'Service',
+    '@id': `${url}#servico`,
+    name: s.name,
+    serviceType: s.seoTitle,
+    description,
+    url,
+    provider: { '@id': `${site.url}/#negocio` },
+    areaServed: site.areaServed.map((name) => ({ '@type': 'City', name })),
+    hasOfferCatalog: {
+      '@type': 'OfferCatalog',
+      name: s.name,
+      itemListElement: s.includes.map((name) => ({ '@type': 'Offer', itemOffered: { '@type': 'Service', name } })),
+    },
+  },
+  {
+    '@type': 'FAQPage',
+    mainEntity: s.faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+  },
+  {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Início', item: site.url },
+      { '@type': 'ListItem', position: 2, name: s.name, item: url },
+    ],
+  },
+];
+---
+<Base title={title} description={description} schema={schema} waMessage={s.contexts[0].message}>
+  <nav class="container crumbs t-caption" aria-label="Você está em">
+    <a href="/">Início</a> <span aria-hidden="true">/</span> <span aria-current="page">{s.name}</span>
+  </nav>
+
+  <section class={`hero tone-${s.tone}`}>
+    <div class="container hero-grid">
+      <div class="stack-6">
+        <p class="t-label kicker"><Icon name={s.icon} size={18} /> {s.label}</p>
+        <h1 class="t-display">{s.seoTitle} em {site.city}</h1>
+        <div class="stack-4 measure lead">
+          {s.intro.map((p) => <p>{p}</p>)}
+        </div>
+
+        <div class="choose">
+          <h2 class="t-body-strong">O que você precisa? Toque e me chame:</h2>
+          <ul role="list" class="ctx-list">
+            {s.contexts.map((c, i) => (
+              <li>
+                <a
+                  class={`btn ${i === 0 ? 'btn-primary' : 'btn-outline'} btn-block ctx`}
+                  href={waLink(c.message)}
+                  target="_blank"
+                  rel="noopener"
+                  data-wa="pagina-servico"
+                  data-service={s.slug}
+                  data-context={c.id}
+                >
+                  <Icon name="message-circle" />
+                  <span>{c.label}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+      <PhotoPlaceholder caption={s.photos[0].caption} ratio="4/5" eager />
+    </div>
+  </section>
+
+  <section class="section includes-section" aria-labelledby="inclui-titulo">
+    <div class="container includes-grid">
+      <h2 id="inclui-titulo" class="t-title">O que eu faço</h2>
+      <ul role="list" class="includes">
+        {s.includes.map((item) => (
+          <li><Icon name="check" size={20} /> <span>{item}</span></li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  {s.photos.length > 1 && (
+    <section class="section" aria-labelledby="fotos-titulo">
+      <div class="container stack-6">
+        <h2 id="fotos-titulo" class="t-title">Trabalhos de {s.topic}</h2>
+        <div class="gallery">
+          {s.photos.slice(1).map((p) => <PhotoPlaceholder caption={p.caption} />)}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <section class="section" aria-labelledby="duvidas-titulo">
+    <div class="container stack-6">
+      <h2 id="duvidas-titulo" class="t-title">Dúvidas sobre {s.topic}</h2>
+      <Faq items={s.faq} />
+    </div>
+  </section>
+
+  <CtaBand
+    title={`${s.name}: me chame no WhatsApp`}
+    message={s.contexts[0].message}
+    source="faixa-servico"
+  />
+
+  <section class="section" aria-labelledby="outros-titulo">
+    <div class="container stack-6">
+      <h2 id="outros-titulo" class="t-heading">Outros serviços</h2>
+      <ul role="list" class="others">
+        {others.map((o) => (
+          <li>
+            <a href={`/${o.slug}`} class={`other tone-${o.tone}`}>
+              <Icon name={o.icon} />
+              <span>{o.name}</span>
+              <Icon name="arrow-right" size={18} class="arrow" />
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .crumbs { padding-top: var(--space-6); }
+  .crumbs a { color: var(--ink-muted); }
+  .hero { padding-block: var(--space-6) var(--space-12); }
+  .hero-grid { display: grid; gap: var(--space-12); align-items: start; }
+  @media (min-width: 900px) { .hero-grid { grid-template-columns: 1.15fr 0.85fr; } }
+  .kicker { display: inline-flex; align-items: center; gap: var(--space-2); }
+  .tone-brand .kicker { color: var(--brand-strong); }
+  .tone-signal .kicker { color: var(--signal); }
+  @media (max-width: 899px) { .hero-grid :global(.ph), .hero-grid :global(img) { aspect-ratio: 16/9; } }
+  .lead { font-size: 18px; line-height: 28px; color: var(--ink-muted); }
+  .choose { display: grid; gap: var(--space-4); padding-top: var(--space-2); }
+  .ctx-list { display: grid; gap: var(--space-2); max-width: 460px; }
+  .ctx { justify-content: flex-start; }
+
+  .includes-section { background: var(--surface-raised); border-block: 1px solid rgb(138 131 114 / 0.35); }
+  .includes-grid { display: grid; gap: var(--space-6); }
+  @media (min-width: 800px) { .includes-grid { grid-template-columns: 1fr 1.6fr; } }
+  .includes { display: grid; gap: var(--space-4); }
+  .includes li { display: flex; gap: var(--space-4); align-items: flex-start; }
+  .includes :global(svg) { flex: none; margin-top: 2px; color: var(--success); }
+
+  .gallery { display: grid; gap: var(--space-6); }
+  @media (min-width: 600px) { .gallery { grid-template-columns: repeat(3, 1fr); } }
+
+  .others { display: grid; gap: var(--space-2); }
+  @media (min-width: 720px) { .others { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1000px) { .others { grid-template-columns: repeat(3, 1fr); } }
+  .other {
+    display: flex; align-items: center; gap: var(--space-4);
+    padding: var(--space-4); min-height: 64px;
+    background: var(--surface-raised); border: 1px solid var(--line); border-radius: var(--radius-md);
+    color: var(--ink); text-decoration: none; font-weight: 600;
+  }
+  .other:hover { border-color: var(--ink); }
+  .tone-brand.other > :global(svg:first-child) { color: var(--brand-strong); }
+  .tone-signal.other > :global(svg:first-child) { color: var(--signal); }
+  .other :global(.arrow) { margin-left: auto; color: var(--ink-muted); }
+</style>

@@ -1,0 +1,22 @@
+---
+/** Barra fixa no rodapé do celular: o WhatsApp sempre a um toque. */
+import Icon from './Icon.astro';
+import { waLink } from '../lib/whatsapp';
+interface Props { message?: string }
+const { message } = Astro.props;
+---
+<div class="wa-bar on-ink">
+  <a class="btn btn-primary btn-block" href={waLink(message)} data-wa="barra-fixa" target="_blank" rel="noopener">
+    <Icon name="message-circle" />
+    Pedir orçamento no WhatsApp
+  </a>
+</div>
+
+<style>
+  .wa-bar {
+    position: fixed; inset: auto 0 0 0; z-index: 60;
+    padding: 12px var(--space-4) calc(12px + env(safe-area-inset-bottom));
+    background: var(--ink);
+  }
+  @media (min-width: 720px) { .wa-bar { display: none; } }
+</style>
