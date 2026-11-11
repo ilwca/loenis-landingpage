@@ -3,6 +3,8 @@
  * Cada `context` vira um atalho no card: abre o WhatsApp com a mensagem já escrita,
  * para o Loenis saber de cara o que o cliente precisa.
  */
+import { foto, type Foto } from './fotos';
+
 export type IconName =
   | 'zap'
   | 'sun-medium'
@@ -35,7 +37,8 @@ export interface Service {
   includes: string[];
   contexts: ServiceContext[];
   faq: { q: string; a: string }[];
-  photos: { caption: string }[];
+  /** Sem `src`, aparece o placeholder "Foto em breve". */
+  photos: { caption: string; src?: Foto }[];
 }
 
 export const services: Service[] = [
@@ -115,9 +118,10 @@ export const services: Service[] = [
       { q: 'Você cuida da homologação?', a: 'Sim. Faço o projeto e acompanho o pedido na concessionária até a troca do medidor.' },
     ],
     photos: [
-      { caption: 'Telhado com placas solares instaladas' },
-      { caption: 'Inversor e quadro de proteção' },
-      { caption: 'Sistema off-grid com banco de baterias' },
+      { caption: 'Telhado com placas solares instaladas', src: foto('placa-solar') },
+      { caption: 'Inversor e quadros de proteção com cabos em conduíte', src: foto('inversor3') },
+      { caption: 'Sistema off-grid com bateria de lítio', src: foto('inversor') },
+      { caption: 'Dois inversores e quadro de proteção', src: foto('inversor2') },
     ],
   },
   {
@@ -192,8 +196,8 @@ export const services: Service[] = [
       { q: 'Atende zona rural?', a: 'Sim. Me mande a localização no WhatsApp para eu passar o valor do deslocamento.' },
     ],
     photos: [
-      { caption: 'Antena Starlink instalada em mastro' },
-      { caption: 'Passagem de cabo com acabamento' },
+      { caption: 'Kit Starlink pronto para instalar', src: foto('starlink') },
+      { caption: 'Antena de internet via satélite instalada no telhado', src: foto('internet-satelite') },
     ],
   },
   {

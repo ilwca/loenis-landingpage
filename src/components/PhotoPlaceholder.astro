@@ -1,25 +1,29 @@
 ---
 /**
- * Espaço reservado para foto real de serviço.
- * Quando a foto existir: coloque o arquivo em src/assets/fotos/ e passe `src`
- * (um import de imagem) — o componente troca o placeholder por <Image> otimizado.
+ * Foto quadrada (1:1) de serviço, ou um espaço reservado "Foto em breve" quando não há `src`.
+ * `src` vem de foto('nome') (src/config/fotos.ts): o navegador baixa a versão
+ * desktop (1024px) a partir de 900px de largura e a mobile (320px) abaixo disso.
  */
-import { Image } from 'astro:assets';
-import type { ImageMetadata } from 'astro';
+import type { Foto } from '../config/fotos';
 import Icon from './Icon.astro';
 
 interface Props {
   caption: string;
-  src?: ImageMetadata;
-  ratio?: '4/3' | '3/2' | '1/1' | '4/5' | '16/9';
+  src?: Foto;
   eager?: boolean;
   showCaption?: boolean;
 }
-const { caption, src, ratio = '4/3', eager = false, showCaption = true } = Astro.props;
+const { caption, src, eager = false, showCaption = true } = Astro.props;
 ---
-<figure class="photo" style={`--ratio:${ratio}`}>
+<figure class="photo">
   {src ? (
-    <Image src={src} alt={caption} widths={[480, 800, 1200]} sizes="(min-width: 900px) 50vw, 100vw" loading={eager ? 'eager' : 'lazy'} />
+    <picture>
+      <source media="(min-width: 900px)" srcset={src.desktop.src} width={src.desktop.width} height={src.desktop.height} type="image/webp" />
+      <img
+        src={src.mobile.src} width={src.mobile.width} height={src.mobile.height} alt={caption}
+        loading={eager ? 'eager' : 'lazy'} fetchpriority={eager ? 'high' : 'auto'} decoding="async"
+      />
+    </picture>
   ) : (
     <div class="ph" role="img" aria-label={`Foto em breve: ${caption}`}>
       <Icon name="image" size={28} />
@@ -30,10 +34,14 @@ const { caption, src, ratio = '4/3', eager = false, showCaption = true } = Astro
 </figure>
 
 <style>
-  .photo { display: grid; gap: var(--space-2); }
+  /* min-width: 0 impede que a largura nativa da foto estique colunas de grid */
+  .photo { display: grid; gap: var(--space-2); min-width: 0; }
+  .photo picture { display: block; min-width: 0; }
   .photo :global(img), .ph {
     width: 100%;
-    aspect-ratio: var(--ratio);
+    /* Sem isto, o atributo height (1024/320) vira altura fixa e a foto fica esticada na vertical */
+    height: auto;
+    aspect-ratio: 1 / 1; /* Sempre quadrada, seja qual for a resolução da foto */
     border-radius: var(--radius-lg);
     object-fit: cover;
   }

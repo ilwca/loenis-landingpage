@@ -1,0 +1,96 @@
+---
+/**
+ * Carrossel horizontal com scroll nativo (toque, trackpad e teclado) e snap.
+ * Os botões avançam um item; ficam desativados nas pontas.
+ * Sem JavaScript, continua rolável normalmente.
+ */
+import Icon from './Icon.astro';
+interface Props { label: string }
+const { label } = Astro.props;
+---
+<div class="carousel" role="region" aria-roledescription="carrossel" aria-label={label} data-carousel>
+  <div class="top">
+    <div class="head"><slot name="header" /></div>
+    <div class="controls">
+    <button type="button" class="nav" data-prev aria-label="Fotos anteriores" disabled>
+      <Icon name="arrow-right" size={20} class="flip" />
+    </button>
+    <button type="button" class="nav" data-next aria-label="Próximas fotos">
+      <Icon name="arrow-right" size={20} />
+    </button>
+    </div>
+  </div>
+  <ul class="track" role="list" data-track tabindex="0">
+    <slot />
+  </ul>
+</div>
+
+<style>
+  .carousel { display: grid; gap: var(--space-4); }
+  .top { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-6); margin-bottom: var(--space-2); }
+  .controls { display: flex; gap: var(--space-2); flex: none; }
+  .nav {
+    display: grid; place-items: center; width: 44px; height: 44px;
+    border-radius: 50%; border: 1px solid var(--ink);
+    background: var(--surface-raised); color: var(--ink); cursor: pointer;
+    transition: background-color 0.15s, color 0.15s, opacity 0.15s;
+  }
+  .nav:hover:not(:disabled) { background: var(--ink); color: var(--surface); }
+  .nav:disabled { opacity: 0.35; cursor: default; }
+  .nav :global(.flip) { transform: rotate(180deg); }
+
+  .track {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 82%;
+    gap: var(--space-6);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    margin: 0;
+    /* Deixa o próximo item aparecendo na borda da tela no celular */
+    margin-inline: calc(-1 * var(--space-4));
+    padding: 2px var(--space-4) var(--space-2);
+    scroll-padding-inline: var(--space-4);
+  }
+  .track::-webkit-scrollbar { display: none; }
+  .track:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+  .track > :global(li) { scroll-snap-align: start; min-width: 0; }
+  @media (min-width: 600px) { .track { grid-auto-columns: calc((100% - var(--space-6)) / 2.2); } }
+  @media (min-width: 720px) {
+    .track { margin-inline: calc(-1 * var(--space-6)); padding-inline: var(--space-6); scroll-padding-inline: var(--space-6); }
+  }
+  @media (min-width: 1000px) { .track { grid-auto-columns: calc((100% - 3 * var(--space-6)) / 3.3); } }
+  @media (prefers-reduced-motion: reduce) { .track { scroll-behavior: auto; } }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-carousel]').forEach((root) => {
+    const track = root.querySelector<HTMLElement>('[data-track]')!;
+    const prev = root.querySelector<HTMLButtonElement>('[data-prev]')!;
+    const next = root.querySelector<HTMLButtonElement>('[data-next]')!;
+
+    const step = () => {
+      const item = track.querySelector<HTMLElement>(':scope > li');
+      const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+      return item ? item.offsetWidth + gap : track.clientWidth;
+    };
+    const update = () => {
+      const max = track.scrollWidth - track.clientWidth - 2;
+      prev.disabled = track.scrollLeft <= 2;
+      next.disabled = track.scrollLeft >= max;
+    };
+
+    prev.addEventListener('click', () => track.scrollBy({ left: -step() }));
+    next.addEventListener('click', () => track.scrollBy({ left: step() }));
+    track.addEventListener('scroll', update, { passive: true });
+    track.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') { e.preventDefault(); track.scrollBy({ left: step() }); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); track.scrollBy({ left: -step() }); }
+    });
+    new ResizeObserver(update).observe(track);
+    update();
+  });
+</script>

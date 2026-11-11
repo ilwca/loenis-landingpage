@@ -3,6 +3,8 @@ import Base from '../layouts/Base.astro';
 import Icon from '../components/Icon.astro';
 import ServiceCard from '../components/ServiceCard.astro';
 import PhotoPlaceholder from '../components/PhotoPlaceholder.astro';
+import Carousel from '../components/Carousel.astro';
+import { foto } from '../config/fotos';
 import Faq from '../components/Faq.astro';
 import CtaBand from '../components/CtaBand.astro';
 import { site, cityLabel } from '../config/site';
@@ -57,7 +59,7 @@ const schema = [
           <li><Icon name="map-pin" size={20} /> Zona urbana e rural</li>
         </ul>
       </div>
-      <PhotoPlaceholder caption="O Loenis trabalhando com EPI" ratio="4/5" eager showCaption={false} />
+      <PhotoPlaceholder caption="O Loenis com uma placa solar pronta para instalar" src={foto('loenis')} eager showCaption={false} />
     </div>
   </section>
 
@@ -95,19 +97,23 @@ const schema = [
 
   <!-- Trabalhos -->
   <section id="trabalhos" class="section" aria-labelledby="trabalhos-titulo">
-    <div class="container stack-6">
-      <div class="stack-2">
-        <p class="t-label kicker">Trabalhos</p>
-        <h2 id="trabalhos-titulo" class="t-title">Serviços feitos</h2>
-        <p class="muted measure">Fotos reais das instalações. Em breve, mais trabalhos aqui.</p>
-      </div>
-      <div class="gallery">
-        {services.map((s) => (
-          <a href={`/${s.slug}`} class="gallery-item">
-            <PhotoPlaceholder caption={s.photos[0].caption} />
-          </a>
-        ))}
-      </div>
+    <div class="container">
+      <Carousel label="Fotos de serviços feitos">
+        <div slot="header" class="stack-2">
+          <p class="t-label kicker">Trabalhos</p>
+          <h2 id="trabalhos-titulo" class="t-title">Serviços feitos</h2>
+          <p class="muted measure">Fotos reais das instalações. Deslize para ver mais.</p>
+        </div>
+        {services.flatMap((s) =>
+          s.photos.filter((p) => p.src).map((p) => (
+            <li>
+              <a href={`/${s.slug}`} class="gallery-item">
+                <PhotoPlaceholder caption={p.caption} src={p.src} />
+              </a>
+            </li>
+          ))
+        )}
+      </Carousel>
     </div>
   </section>
 
@@ -143,7 +149,6 @@ const schema = [
     .hero { padding-block: var(--space-12) calc(var(--space-12) * 1.5); }
     .hero-grid { grid-template-columns: 1.15fr 0.85fr; }
   }
-  @media (max-width: 899px) { .hero-grid :global(.ph), .hero-grid :global(img) { aspect-ratio: 16/9; } }
   .lead { font-size: 18px; line-height: 28px; color: var(--ink-muted); }
   .hero-cta { display: flex; flex-wrap: wrap; gap: var(--space-4); }
   @media (max-width: 479px) { .hero-cta .btn { width: 100%; } }
@@ -166,9 +171,6 @@ const schema = [
     font: 700 18px/1 var(--font-display);
   }
 
-  .gallery { display: grid; gap: var(--space-6); grid-template-columns: 1fr; }
-  @media (min-width: 600px) { .gallery { grid-template-columns: repeat(2, 1fr); } }
-  @media (min-width: 1000px) { .gallery { grid-template-columns: repeat(3, 1fr); } }
   .gallery-item { color: inherit; text-decoration: none; }
 
   .area { background: var(--brand-tint); }
